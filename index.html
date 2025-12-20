@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Mengajar Guru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* --- GAYA NOMOR 2 (INPUT / ISIAN) --- */
+        .form-input-custom {
+            border-width: 2px;
+            border-color: #60a5fa; /* Blue-400 */
+            color: #334155;        /* Slate-700 */
+            font-weight: 400;      
+            font-size: 1rem;       
+            padding-top: 0.85rem;  
+            padding-bottom: 0.85rem;
+            transition: all 0.3s ease;
+            background-color: #ffffff;
+        }
+        .form-input-custom:focus {
+            border-color: #2563eb; /* Blue-600 */
+            outline: none;
+            background-color: #eff6ff; /* Background biru muda */
+            color: #0f172a; 
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+        }
+        .form-input-custom:disabled {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* --- GAYA NOMOR 1 (LABEL / JUDUL PERTANYAAN) --- */
+        .form-label-custom {
+            font-size: 1.25rem;    
+            font-weight: 700;      
+            color: #1e40af;        /* Blue-800 */
+            margin-bottom: 0.5rem;
+            display: block;
+            letter-spacing: 0.01em; 
+        }
+
+        /* Checkbox Custom Style inside Dropdown */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .custom-checkbox:last-child {
+            border-bottom: none;
+        }
+        .custom-checkbox:hover {
+            background-color: #eff6ff;
+        }
+        .custom-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+        .custom-checkbox span {
+            font-size: 0.95rem;
+            color: #475569; 
+            font-weight: 500;
+        }
+        .custom-checkbox input:checked + span {
+            color: #1e40af;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border-t-8 border-blue-800">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-800 p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10">
+                <i class="fas fa-chalkboard-teacher text-9xl absolute -right-10 -bottom-10 text-white"></i>
+                <i class="fas fa-book-open text-8xl absolute -left-10 -top-10 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white relative z-10 tracking-wide drop-shadow-md">Jurnal Mengajar Guru</h2>
+            <p class="text-blue-100 text-base mt-2 relative z-10 font-medium">SMP Negeri 4 Majenang</p>
+        </div>
+
+        <!-- Initial Loader Overlay -->
+        <div id="initialLoader" class="hidden absolute inset-0 bg-white/95 z-50 flex flex-col items-center justify-center backdrop-blur-sm px-4 text-center">
+            <div class="loader border-blue-600 border-t-transparent w-12 h-12 mb-4 border-4"></div>
+            <span class="text-blue-800 font-bold text-xl mb-2">Sinkronisasi Database...</span>
+            <span class="text-slate-500 text-sm max-w-xs">Sedang membaca data Guru & Siswa dari Google Sheet...</span>
+        </div>
+
+        <!-- Form Area -->
+        <div class="p-8 md:p-10 relative">
+            <form id="jurnalForm" name="submit-to-google-sheet">
+                
+                <!-- Nama Guru -->
+                <div class="mb-8">
+                    <label class="form-label-custom">Nama Guru</label>
+                    <div class="relative">
+                        <select name="Nama Guru" id="namaGuru" required class="form-input-custom block w-full pl-5 pr-12 rounded-xl appearance-none cursor-pointer">
+                            <option value="" disabled selected>Menunggu data...</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-blue-500">
+                            <i class="fas fa-chevron-down text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <!-- Kelas -->
+                    <div>
+                        <label class="form-label-custom">Kelas</label>
+                        <div class="relative">
+                            <select name="Kelas" id="kelasSelect" required class="form-input-custom block w-full pl-5 pr-12 rounded-xl cursor-pointer appearance-none" disabled>
+                                <option value="" disabled selected>Menunggu data...</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-blue-500">
+                                <i class="fas fa-chevron-down text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hari -->
+                    <div>
+                        <label class="form-label-custom">Hari</label>
+                        <div class="relative">
+                            <select name="Hari" id="hariSelect" required class="form-input-custom block w-full pl-5 pr-12 rounded-xl cursor-pointer appearance-none">
+                                <option value="Senin">Senin</option>
+                                <option value="Selasa">Selasa</option>
+                                <option value="Rabu">Rabu</option>
+                                <option value="Kamis">Kamis</option>
+                                <option value="Jumat">Jumat</option>
+                                <option value="Sabtu">Sabtu</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-blue-500">
+                                <i class="fas fa-chevron-down text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tanggal -->
+                <div class="mb-8">
+                    <label class="form-label-custom">Tanggal</label>
+                    <input type="date" name="Tanggal" id="tanggalInput" required class="form-input-custom block w-full px-5 rounded-xl cursor-pointer">
+                </div>
+
+                <!-- Jam Ke (Custom Dropdown) -->
+                <div class="mb-8 relative">
+                    <label class="form-label-custom">Jam Ke (Pilih satu atau lebih)</label>
+                    
+                    <!-- Tombol Dropdown -->
+                    <div id="jamDropdownBtn" class="form-input-custom w-full px-5 rounded-xl cursor-pointer flex justify-between items-center select-none hover:bg-slate-50">
+                        <span id="jamTextDisplay" class="truncate text-slate-500">Pilih Jam Mengajar...</span>
+                        <i class="fas fa-clock text-blue-500 text-lg"></i>
+                    </div>
+
+                    <!-- Isi Dropdown (Checkbox List) -->
+                    <div id="jamDropdownList" class="hidden absolute z-20 w-full mt-2 bg-white border border-blue-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto ring-4 ring-blue-50">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="1"> <span>Jam ke-1</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="2"> <span>Jam ke-2</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="3"> <span>Jam ke-3</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="4"> <span>Jam ke-4</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="5"> <span>Jam ke-5</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="6"> <span>Jam ke-6</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="7"> <span>Jam ke-7</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="8"> <span>Jam ke-8</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="9"> <span>Jam ke-9</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="jam_temp" value="10"> <span>Jam ke-10</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Hidden Input untuk menampung nilai akhir -->
+                    <input type="hidden" name="Jam Ke" id="finalJam">
+                </div>
+
+                <!-- Mata Pelajaran -->
+                <div class="mb-8">
+                    <label class="form-label-custom">Mata Pelajaran</label>
+                    <div class="relative">
+                        <select name="Mata Pelajaran" id="mapelSelect" required class="form-input-custom block w-full pl-5 pr-12 rounded-xl cursor-pointer appearance-none" disabled>
+                            <option value="" disabled selected>Menunggu data...</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-blue-500">
+                            <i class="fas fa-chevron-down text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materi -->
+                <div class="mb-8">
+                    <label class="form-label-custom">Materi Pembelajaran</label>
+                    <textarea name="Materi" required rows="4" class="form-input-custom block w-full px-5 rounded-xl resize-y" placeholder="Tuliskan ringkasan materi..."></textarea>
+                </div>
+
+                <!-- Absensi -->
+                <div class="mb-10 p-6 bg-red-50 rounded-2xl border border-red-100 shadow-inner">
+                    <label class="form-label-custom !text-red-700 !text-xl mb-4 flex justify-between items-center border-b border-red-200 pb-2">
+                        <span><i class="fas fa-user-times mr-2"></i>Peserta Didik Tidak Hadir</span>
+                        <button type="button" id="btnAddSiswa" onclick="addAbsensiRow()" class="text-sm bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform active:scale-95" disabled>
+                            <i class="fas fa-plus mr-1"></i> Tambah
+                        </button>
+                    </label>
+                    
+                    <div id="absensiContainer" class="space-y-3 mt-4">
+                        <div class="text-base text-slate-500 italic font-medium text-center py-4 bg-white/50 rounded-lg border border-dashed border-slate-300" id="emptyState">
+                            <span id="pilihKelasFirstMsg">Mohon pilih <b>Kelas</b> terlebih dahulu.</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="Absensi" id="finalAbsensi" value="Hadir Semua">
+                </div>
+
+                <!-- Buttons -->
+                <button type="submit" id="btnSubmit" class="w-full bg-gradient-to-r from-blue-700 to-blue-600 text-white font-bold text-xl py-4 px-6 rounded-xl hover:from-blue-800 hover:to-blue-700 transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1 flex justify-center items-center gap-3 ring-4 ring-transparent focus:ring-blue-200">
+                    <span>Kirim Data</span>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+
+                <button type="button" id="btnLoading" disabled class="hidden w-full bg-slate-400 text-white font-bold text-xl py-4 px-6 rounded-xl cursor-not-allowed flex justify-center items-center gap-3">
+                    <div class="loader"></div>
+                    <span>Mengirim Data...</span>
+                </button>
+
+            </form>
+
+            <!-- Status Messages -->
+            <div id="successMessage" class="hidden mt-8 bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-5 rounded-r-xl relative animate-fade-in-up shadow-md">
+                <div class="flex items-center gap-4">
+                    <div class="bg-green-100 p-2 rounded-full">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <strong class="font-bold text-lg block">Berhasil Terkirim!</strong>
+                        <span class="text-green-700">Data jurnal telah berhasil disimpan ke database.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="hidden mt-8 bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-5 rounded-r-xl relative animate-fade-in-up shadow-md">
+                <div class="flex items-center gap-4">
+                    <div class="bg-red-100 p-2 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <strong class="font-bold text-lg block">Gagal Mengirim!</strong>
+                        <span id="errorText" class="text-red-700">Terjadi kesalahan koneksi. Silakan coba lagi.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-center text-sm font-medium text-slate-400 mt-10">Jurnal Guru &copy; SMP Negeri 4 Majenang</p>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI SPREADSHEET (SUMBER DATA DROPDOWN) ---
+        const SHEET_ID = '1_SWB7qPQ49P95tA7UeXk3qMFwzi-tHHgj5K3yNddOc8';
+        const SHEET_NAME_DATA = 'Data';  
+        const SHEET_NAME_SISWA = 'Kelas'; 
+
+        // --- KONFIGURASI SCRIPT (TUJUAN PENYIMPANAN DATA) ---
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyERWEnQY6FHzXITzUXmtUUQyTc96AxVF3m4ZfWZJLb3RZ2aCXcRLwnhAIZYMLaclZ3Bw/exec';
+
+        let allStudentsData = []; 
+        let currentClassStudents = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tanggalInput').valueAsDate = new Date();
+            loadAllDataFromCSV();
+            setupDropdownJam();
+        });
+
+        // --- LOGIKA DROPDOWN JAM ---
+        function setupDropdownJam() {
+            const btn = document.getElementById('jamDropdownBtn');
+            const list = document.getElementById('jamDropdownList');
+            const display = document.getElementById('jamTextDisplay');
+            const inputs = list.querySelectorAll('input[type="checkbox"]');
+
+            // Toggle Dropdown
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                list.classList.toggle('hidden');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!btn.contains(e.target) && !list.contains(e.target)) {
+                    list.classList.add('hidden');
+                }
+            });
+
+            // Update Text saat dicentang
+            inputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    const checked = Array.from(inputs)
+                        .filter(i => i.checked)
+                        .map(i => i.value);
+                    
+                    if (checked.length > 0) {
+                        // Urutkan angka
+                        checked.sort((a,b) => a - b);
+                        display.innerText = "Jam ke: " + checked.join(", ");
+                        display.classList.remove('text-slate-500');
+                        display.classList.add('text-blue-900', 'font-semibold');
+                    } else {
+                        display.innerText = "Pilih Jam Mengajar...";
+                        display.classList.add('text-slate-500');
+                        display.classList.remove('text-blue-900', 'font-semibold');
+                    }
+                    document.getElementById('finalJam').value = checked.join(", ");
+                });
+            });
+        }
+
+        // --- FETCH CSV ---
+        function getCSVUrl(sheetName) {
+            return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+        }
+
+        async function loadAllDataFromCSV() {
+            const loaderOverlay = document.getElementById('initialLoader');
+            loaderOverlay.classList.remove('hidden');
+            loaderOverlay.classList.add('flex');
+
+            try {
+                const [dataResponse, siswaResponse] = await Promise.all([
+                    fetch(getCSVUrl(SHEET_NAME_DATA), { cache: 'no-store' }),
+                    fetch(getCSVUrl(SHEET_NAME_SISWA), { cache: 'no-store' })
+                ]);
+
+                if (!dataResponse.ok) throw new Error("Gagal mengambil data Sheet 'Data'");
+                if (!siswaResponse.ok) throw new Error("Gagal mengambil data Sheet 'Kelas'");
+
+                const dataText = await dataResponse.text();
+                const siswaText = await siswaResponse.text();
+
+                if (dataText.includes("<!DOCTYPE html>") || siswaText.includes("<!DOCTYPE html>")) {
+                    throw new Error("Izin Akses Ditolak. Pastikan Sheet di-set ke 'Anyone with the link can view'.");
+                }
+
+                const dataRows = parseCSV(dataText);
+                const siswaRows = parseCSV(siswaText);
+
+                // --- 1. PROSES SHEET 'DATA' (GURU, KELAS, MAPEL) ---
+                let guruSet = new Set();
+                let kelasSet = new Set();
+                let mapelSet = new Set();
+
+                for (let i = 1; i < dataRows.length; i++) {
+                    const row = dataRows[i];
+                    if (row.length > 0) {
+                        if (row[0]) guruSet.add(row[0].trim());
+                        if (row[1]) kelasSet.add(row[1].trim());
+                        if (row[2]) mapelSet.add(row[2].trim());
+                    }
+                }
+
+                populateSelect(document.getElementById('namaGuru'), [...guruSet], "Pilih Nama Guru...");
+                populateSelect(document.getElementById('kelasSelect'), [...kelasSet], "Pilih Kelas...");
+                populateSelect(document.getElementById('mapelSelect'), [...mapelSet], "Pilih Mata Pelajaran...");
+
+                document.getElementById('kelasSelect').disabled = false;
+                document.getElementById('mapelSelect').disabled = false;
+
+                // --- 2. PROSES SHEET 'KELAS' (SISWA) ---
+                allStudentsData = [];
+                if (siswaRows.length > 0) {
+                    const headers = siswaRows[0]; 
+                    for (let colIndex = 0; colIndex < headers.length; colIndex++) {
+                        const className = headers[colIndex] ? headers[colIndex].trim() : "";
+                        if (className) {
+                            for (let rowIndex = 1; rowIndex < siswaRows.length; rowIndex++) {
+                                const row = siswaRows[rowIndex];
+                                if (row[colIndex]) {
+                                    const studentName = row[colIndex].trim();
+                                    if (studentName) {
+                                        allStudentsData.push({
+                                            nama: studentName,
+                                            kelas: className
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                loaderOverlay.classList.add('hidden');
+                loaderOverlay.classList.remove('flex');
+
+            } catch (error) {
+                console.error("CSV Error:", error);
+                loaderOverlay.classList.add('hidden');
+                alert(`ERROR: ${error.message}\n\nTips: Cek nama sheet ('Data' & 'Kelas') dan izin akses.`);
+                document.getElementById('namaGuru').innerHTML = '<option>Gagal memuat data</option>';
+            }
+        }
+
+        // CSV Parser
+        function parseCSV(text) {
+            text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentCell += '"'; 
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    currentRow.push(currentCell);
+                    currentCell = '';
+                } else if (char === '\n' && !inQuotes) {
+                    currentRow.push(currentCell);
+                    if (currentRow.length > 0 && (currentRow.length > 1 || currentRow[0] !== '')) {
+                         rows.push(currentRow);
+                    }
+                    currentRow = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+            }
+            if (currentCell || currentRow.length > 0) {
+                currentRow.push(currentCell);
+                rows.push(currentRow);
+            }
+            return rows;
+        }
+
+        function populateSelect(element, items, defaultText) {
+            items.sort();
+            element.innerHTML = `<option value="" disabled selected>${defaultText}</option>`;
+            items.forEach(item => {
+                let cleanItem = item.replace(/^"|"$/g, ''); 
+                if(cleanItem) {
+                    const option = document.createElement('option');
+                    option.value = cleanItem;
+                    option.text = cleanItem;
+                    element.appendChild(option);
+                }
+            });
+        }
+
+        const normalize = str => str ? str.toString().toLowerCase().replace(/\s/g, '') : '';
+
+        // --- FILTER SISWA BERDASARKAN KELAS ---
+        document.getElementById('kelasSelect').addEventListener('change', function() {
+            const selectedClass = this.value;
+            const btnAddSiswa = document.getElementById('btnAddSiswa');
+            const container = document.getElementById('absensiContainer');
+
+            currentClassStudents = allStudentsData
+                .filter(s => normalize(s.kelas) === normalize(selectedClass))
+                .map(s => s.nama);
+
+            container.innerHTML = ''; 
+            if (currentClassStudents.length > 0) {
+                container.innerHTML = '<div class="text-base text-slate-500 italic text-center py-4 bg-white/50 rounded-lg border border-dashed border-slate-300" id="emptyState">Tidak ada siswa yang absen (Hadir Semua)</div>';
+                btnAddSiswa.disabled = false;
+                btnAddSiswa.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                container.innerHTML = `<div class="text-base text-red-500 italic text-center py-4 bg-white/50 rounded-lg border border-dashed border-red-300" id="emptyState">
+                    Data siswa kelas <b>${selectedClass}</b> tidak ditemukan.
+                </div>`;
+                btnAddSiswa.disabled = true;
+                btnAddSiswa.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        function addAbsensiRow() {
+            const container = document.getElementById('absensiContainer');
+            const emptyState = document.getElementById('emptyState');
+            if(emptyState) emptyState.style.display = 'none';
+
+            const rowId = 'row-' + Date.now();
+            let studentOptions = '<option value="" disabled selected>Pilih Siswa...</option>';
+            currentClassStudents.forEach(nama => {
+                studentOptions += `<option value="${nama.replace(/"/g, '&quot;')}">${nama}</option>`;
+            });
+
+            const div = document.createElement('div');
+            div.className = 'flex flex-col sm:flex-row gap-3 items-center animate-fade-in-up bg-white p-4 rounded-xl border border-gray-200 shadow-sm transition-all hover:shadow-md';
+            div.id = rowId;
+            div.innerHTML = `
+                <select class="absensi-nama flex-1 w-full text-base font-normal border-2 border-slate-200 rounded-lg p-2 focus:border-red-500 focus:outline-none text-slate-700 bg-white">
+                    ${studentOptions}
+                </select>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <select class="absensi-ket flex-1 sm:w-32 text-base font-medium border-2 border-slate-200 rounded-lg p-2 focus:border-red-500 focus:outline-none text-slate-700 bg-white">
+                        <option value="Sakit">Sakit</option>
+                        <option value="Ijin">Ijin</option>
+                        <option value="Alpha">Alpha</option>
+                    </select>
+                    <button type="button" onclick="removeRow('${rowId}')" class="text-white bg-red-100 text-red-600 hover:bg-red-600 hover:text-white rounded-lg px-4 py-2 transition-colors">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeRow(id) {
+            const row = document.getElementById(id);
+            if(row) row.remove();
+            const container = document.getElementById('absensiContainer');
+            const rows = container.querySelectorAll('div[id^="row-"]');
+            if (rows.length === 0) {
+                 const emptyState = document.getElementById('emptyState');
+                 if(emptyState) emptyState.style.display = 'block';
+            }
+        }
+
+        const form = document.forms['submit-to-google-sheet'];
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnLoading = document.getElementById('btnLoading');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            const checkedJams = document.getElementById('finalJam').value;
+            if (!checkedJams) {
+                alert("Harap pilih minimal satu Jam Mengajar!");
+                // Buka dropdown jam biar user sadar
+                document.getElementById('jamDropdownList').classList.remove('hidden');
+                return;
+            }
+
+            const absensiRows = document.querySelectorAll('#absensiContainer > div[id^="row-"]');
+            let absensiData = [];
+            absensiRows.forEach(row => {
+                const namaSelect = row.querySelector('.absensi-nama');
+                const ketSelect = row.querySelector('.absensi-ket');
+                if(namaSelect && namaSelect.value) {
+                    absensiData.push(`${namaSelect.value} (${ketSelect.value})`);
+                }
+            });
+            document.getElementById('finalAbsensi').value = absensiData.length > 0 ? absensiData.join(", ") : "Hadir Semua";
+
+            btnSubmit.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            btnLoading.classList.add('flex');
+
+            // --- PERBAIKAN FORMAT TANGGAL ---
+            const formData = new FormData(form);
+            const rawDate = document.getElementById('tanggalInput').value;
+            if (rawDate) {
+                // Konversi YYYY-MM-DD ke "16 Desember 2025"
+                const [year, month, day] = rawDate.split('-').map(Number);
+                const dateObj = new Date(year, month - 1, day);
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+                formData.set('Tanggal', formattedDate);
+            }
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => {
+                    btnLoading.classList.add('hidden');
+                    btnLoading.classList.remove('flex');
+                    btnSubmit.classList.remove('hidden');
+                    
+                    document.getElementById('successMessage').classList.remove('hidden');
+                    form.reset();
+                    document.getElementById('tanggalInput').valueAsDate = new Date();
+                    
+                    // Reset Custom UI
+                    document.getElementById('jamTextDisplay').innerText = "Pilih Jam Mengajar...";
+                    document.getElementById('jamTextDisplay').classList.remove('text-blue-900', 'font-semibold');
+                    document.getElementById('jamTextDisplay').classList.add('text-slate-500');
+                    document.querySelectorAll('input[name="jam_temp"]').forEach(cb => cb.checked = false);
+                    document.getElementById('finalJam').value = "";
+                    
+                    document.getElementById('absensiContainer').innerHTML = '<div class="text-base text-slate-500 italic text-center py-4 bg-white/50 rounded-lg border border-dashed border-slate-300" id="emptyState"><span id="pilihKelasFirstMsg">Mohon pilih <b>Kelas</b> terlebih dahulu.</span></div>';
+                    document.getElementById('btnAddSiswa').disabled = true;
+
+                    setTimeout(() => {
+                        document.getElementById('successMessage').classList.add('hidden');
+                    }, 4000);
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    btnLoading.classList.add('hidden');
+                    btnLoading.classList.remove('flex');
+                    btnSubmit.classList.remove('hidden');
+                    document.getElementById('errorText').textContent = error.message;
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                });
+        });
+    </script>
+</body>
+</html>
